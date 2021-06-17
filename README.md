@@ -1,1 +1,1 @@
-# touch_DDGs
+This script is designed to allow you to easily create or edit Dynamic Distribution Groups.
