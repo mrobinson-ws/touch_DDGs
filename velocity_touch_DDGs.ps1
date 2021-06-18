@@ -6,6 +6,7 @@ Param()
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 [void] [System.Windows.Forms.Application]::EnableVisualStyles()
+# Clear Variables to prevent old data
 Clear-Variable SelectionFormResult -ErrorAction SilentlyContinue
 Clear-Variable Exceldoc -ErrorAction SilentlyContinue
 Clear-Variable IncDDGs -ErrorAction SilentlyContinue
