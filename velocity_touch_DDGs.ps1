@@ -8,6 +8,18 @@ Param()
 [void] [System.Windows.Forms.Application]::EnableVisualStyles()
 Clear-Variable SelectionFormResult -ErrorAction SilentlyContinue
 Clear-Variable Exceldoc -ErrorAction SilentlyContinue
+Clear-Variable IncDDGs -ErrorAction SilentlyContinue
+
+# Test And Connect To AzureAD If Needed
+try {
+    Write-Verbose -Message "Testing connection to Azure AD"
+    Get-AzureAdDomain -ErrorAction Stop | Out-Null
+    Write-Verbose -Message "Already connected to Azure AD"
+}
+catch {
+    Write-Verbose -Message "Connecting to Azure AD"
+    Connect-AzureAD
+}
 
 #Test And Connect To Microsoft Exchange Online If Needed
 try {
@@ -31,7 +43,7 @@ $SelectionForm.TopMost = $True
 $RemoveDDGButton = New-Object System.Windows.Forms.Button
 $RemoveDDGButton.TabIndex = 2
 $RemoveDDGButton.Dock = [System.Windows.Forms.DockStyle]::Top
-$RemoveDDGButton.Text = 'Remove DDG'
+$RemoveDDGButton.Text = 'Remove DDG(s)'
 $RemoveDDGButton.DialogResult = 3
 $SelectionForm.Controls.Add($RemoveDDGButton)
 
@@ -47,7 +59,7 @@ $SelectionForm.Controls.Add($EditDDGButton)
 $CreateDDGButton = New-Object System.Windows.Forms.Button
 $CreateDDGButton.TabIndex = 0
 $CreateDDGButton.Dock = [System.Windows.Forms.DockStyle]::Top
-$CreateDDGButton.Text = 'Create DDG'
+$CreateDDGButton.Text = 'Create DDG(s) From Excel File'
 $CreateDDGButton.DialogResult = 1
 $SelectionForm.Controls.Add($CreateDDGButton)
 
@@ -60,34 +72,38 @@ if($SelectionFormResult -eq 1){
         Filter = 'SpreadSheet (*.xlsx)|*.xlsx'
     }
     $null = $ExcelDoc.ShowDialog()
-    
+
     # Import From Chosen Excel File
     $IncDDGs = Import-Excel -Path $ExcelDoc.Filename -ErrorAction Stop
     
+    # Create Domain Selection Form
     $DomainSelectionForm = New-Object System.Windows.Forms.Form
+    $DomainSelectionForm.Text = "Please Select Domain"
     $DomainSelectionForm.Autosize = $True
     $DomainSelectionForm.MaximizeBox = $False
     $DomainSelectionForm.StartPosition = "CenterScreen"
     $DomainSelectionForm.TopMost = $True
     
-    $DomainOKButton = New-Object System.Windows.Forms.Form
-    $DomainOKButton.TabIndex = 6
+    # Create OK Button for Domain Selection Form
+    $DomainOKButton = New-Object System.Windows.Forms.Button
+    $DomainOKButton.TabIndex = 1
     $DomainOKButton.Dock = [System.Windows.Forms.DockStyle]::Bottom
     $DomainOKButton.Text = 'OK'
     $DomainOKButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    $DomainOKButton.Enabled = $false
     $DomainSelectionForm.AcceptButton = $DomainOKButton
     $DomainSelectionForm.Controls.Add($DomainOKButton)
 
-    $domainComboBox = New-Object System.Windows.Forms.ComboBox
-    $domainComboBox.TabIndex = 0
-    $domainComboBox.Dock = [System.Windows.Forms.DockStyle]::Fill
-    $domainComboBox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-    $domainComboBox.FormattingEnabled = $true
+    # Create Combobox to Select Domain
+    $DomainCombobox = New-Object System.Windows.Forms.ComboBox
+    $DomainCombobox.TabIndex = 0
+    $DomainCombobox.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $DomainCombobox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+    $DomainCombobox.FormattingEnabled = $true
     foreach($domain in Get-AzureADDomain){
-        $null = $domainComboBox.Items.add($domain.Name)
+        $null = $DomainCombobox.Items.add($domain.Name)
     }
-    $DomainSelectionForm.Controls.Add($domainComboBox)
+    $DomainComboBox.SelectedIndex = 0
+    $DomainSelectionForm.Controls.Add($DomainCombobox)
 
     $DomainSelectionResult = $DomainSelectionForm.ShowDialog()
 
@@ -109,5 +125,18 @@ elseif($SelectionFormResult -eq 2){
     Write-Host "You Picked Edit, Which Is Not Functional At This Time.  Hello World!"
 }
 elseif ($SelectionFormResult -eq 3) {
-    Write-Host "You Picked Remove, Which Is Not Functional At This Time.  Hello World!"
+    # Pull Dynamic Distribution Groups and Present Selection Out-Gridview
+    $ActiveDDGs = Get-DynamicDistributionGroup | Out-GridView -Passthru -Title "Select DDG(s) To Remove"
+    #Verify Active DDGs
+    if ($ActiveDDGs){
+        #Remove Each Selected DDG
+        foreach($ActiveDDG in $ActiveDDGs){
+            Remove-DynamicDistributionGroup -Identity $ActiveDDG.Name -Confirm:$False
+        }
+        Write-Verbose "All Selected Dynamic Distribution Groups Removed"
+    }
+    else { 
+        Write-Verbose "No Active Dynamic Distribution Groups OR Cancel Button Was Selected"
+        Throw
+    }
 }
