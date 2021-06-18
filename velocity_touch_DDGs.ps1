@@ -127,7 +127,6 @@ elseif ($SelectionFormResult -eq 2) {
         Write-Verbose "All Selected Dynamic Distribution Groups Removed"
     }
     else { 
-        Write-Verbose "No Active Dynamic Distribution Groups OR Cancel Button Was Selected"
-        Throw
+        Throw "No Active Dynamic Distribution Groups OR Cancel Button Was Selected"
     }
 }
