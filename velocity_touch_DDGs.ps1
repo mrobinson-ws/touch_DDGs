@@ -42,19 +42,11 @@ $SelectionForm.TopMost = $True
 
 # Create "Edit DDG" Button
 $RemoveDDGButton = New-Object System.Windows.Forms.Button
-$RemoveDDGButton.TabIndex = 2
+$RemoveDDGButton.TabIndex = 1
 $RemoveDDGButton.Dock = [System.Windows.Forms.DockStyle]::Top
 $RemoveDDGButton.Text = 'Remove DDG(s)'
-$RemoveDDGButton.DialogResult = 3
+$RemoveDDGButton.DialogResult = 2
 $SelectionForm.Controls.Add($RemoveDDGButton)
-
-# Create "Edit DDG" Button
-$EditDDGButton = New-Object System.Windows.Forms.Button
-$EditDDGButton.TabIndex = 1
-$EditDDGButton.Dock = [System.Windows.Forms.DockStyle]::Top
-$EditDDGButton.Text = 'Edit DDG'
-$EditDDGButton.DialogResult = 2
-$SelectionForm.Controls.Add($EditDDGButton)
 
 # Create "Create DDG" Button
 $CreateDDGButton = New-Object System.Windows.Forms.Button
@@ -122,10 +114,8 @@ if($SelectionFormResult -eq 1){
         }
     }
 }
-elseif($SelectionFormResult -eq 2){
-    Write-Host "You Picked Edit, Which Is Not Functional At This Time.  Hello World!"
-}
-elseif ($SelectionFormResult -eq 3) {
+
+elseif ($SelectionFormResult -eq 2) {
     # Pull Dynamic Distribution Groups and Present Selection Out-Gridview
     $ActiveDDGs = Get-DynamicDistributionGroup | Out-GridView -Passthru -Title "Select DDG(s) To Remove"
     #Verify Active DDGs
