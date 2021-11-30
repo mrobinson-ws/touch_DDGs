@@ -103,14 +103,14 @@ if($SelectionFormResult -eq 1){
     if($DomainSelectionResult = [System.Windows.Forms.DialogResult]::OK){
         foreach ($DDG in $IncDDGs) {
             $recipientFilter = "(HiddenFromAddressListsEnabled -eq '$False' -and RecipientTypeDetails -eq 'UserMailbox')"
-            if ($ddg.city -and $ddg.state) {
-                $recipientFilter += " -and (city -eq '$($ddg.city)' -and stateorprovince -eq '$($ddg.state)')"
+            if($ddg.Group) {
+                $recipientFilter += "-and (CustomAtrribute2 -eq '$($ddg.Group)')"
             }
             if ($ddg.Type) {
-                $recipientFilter += " -and (CustomAttribute1 -eq '$($ddg.type)')"
+                $recipientFilter += " -and (CustomAttribute1 -eq '$($ddg.Type)')"
             }
             $SMTP = $DDG.Alias + "@" + $DomainComboBox.Text
-            New-DynamicDistributionGroup -Name $DDG.Group -Alias $DDG.alias -PrimarySMTPAddress $SMTP -RecipientFilter $recipientFilter
+            New-DynamicDistributionGroup -Name $DDG.Name -Alias $DDG.Alias -PrimarySMTPAddress $SMTP -RecipientFilter $recipientFilter
         }
     }
 }
