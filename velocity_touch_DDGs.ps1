@@ -25,7 +25,7 @@ catch {
 #Test And Connect To Microsoft Exchange Online If Needed
 try {
     Write-Verbose -Message "Testing connection to Microsoft Exchange Online"
-    Get-Mailbox -ErrorAction Stop | Out-Null
+    Get-AcceptedDomain -ErrorAction Stop | Out-Null
     Write-Verbose -Message "Already connected to Microsoft Exchange Online"
 }
 catch {
