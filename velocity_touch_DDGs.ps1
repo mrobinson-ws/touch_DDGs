@@ -104,7 +104,7 @@ if($SelectionFormResult -eq 1){
         foreach ($DDG in $IncDDGs) {
             $recipientFilter = "(HiddenFromAddressListsEnabled -eq '$False' -and RecipientTypeDetails -eq 'UserMailbox')"
             if($ddg.Group) {
-                $recipientFilter += "-and (CustomAtrribute2 -eq '$($ddg.Group)')"
+                $recipientFilter += " -and (CustomAttribute2 -eq '$($ddg.Group)')"
             }
             if ($ddg.Type) {
                 $recipientFilter += " -and (CustomAttribute1 -eq '$($ddg.Type)')"
