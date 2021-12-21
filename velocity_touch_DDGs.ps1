@@ -106,12 +106,10 @@ if($SelectionFormResult -eq 1){
             if($ddg.Group) {
                 $recipientFilter += " -and (CustomAttribute2 -eq '$($ddg.Group)')"
             }
-            if ($ddg.Type) {
-                $recipientFilter += " -and (CustomAttribute1 -eq '$($ddg.Type)')"
-            }
-            elseif([string]::IsNullOrWhiteSpace($ddg.type)) {
+            if ($ddg.Type -eq 'Employee') {
                 $recipientFilter += " -and (CustomAttribute1 -eq 'Employee' -or CustomAttribute1 -eq 'Contractor - 1099')"
             }
+
             $SMTP = $DDG.Alias + "@" + $DomainComboBox.Text
             New-DynamicDistributionGroup -Name $DDG.Name -Alias $DDG.Alias -PrimarySMTPAddress $SMTP -RecipientFilter $recipientFilter
         }
